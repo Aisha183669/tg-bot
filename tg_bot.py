@@ -1,8 +1,8 @@
 from telegram import Update
 from telegram.ext import ApplicationBuilder, CommandHandler, MessageHandler, filters, ContextTypes
 
-
-TOKEN = "8685417658:AAGH4OKHOv3rax106gum5xERvQWvplif7Uc"
+import os
+TOKEN = os.getenv("TELEGRAM_BOT_TOKEN")
 def chat(messe):
     count=0
     if messe=="привет":
