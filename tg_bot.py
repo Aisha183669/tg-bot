@@ -1,4 +1,4 @@
-from telegram import Update
+from telegram import Update, ReplyKeyboardMarkup
 from telegram.ext import ApplicationBuilder, CommandHandler, MessageHandler, filters, ContextTypes
 
 import os
@@ -27,9 +27,16 @@ def chat(messe):
 
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
-    await update.message.reply_text(
-        "Привет! Напиши мне что-нибудь."
+    keyboard=[["привет","как дела?"],["помощь","пока"]]
+    reply_markup = ReplyKeyboardMarkup(
+        keyboard,
+        resize_keyboard=True
     )
+    await update.message.reply_text(
+        "Привет! Напиши мне что-нибудь.",
+        reply_markup=reply_markup
+    )
+
 
 
 async def answer_message(
