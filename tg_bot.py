@@ -2,39 +2,15 @@ from telegram import Update, ReplyKeyboardMarkup
 from telegram.ext import ApplicationBuilder, CommandHandler, MessageHandler, filters, ContextTypes
 
 import os
+from dotenv import load_dotenv
+load_dotenv()
 TOKEN = os.getenv("TELEGRAM_BOT_TOKEN")
-def chat(messe):
-    count=0
-    if messe=="привет":
-        return "как дела?"
-        count=count+1
-    elif messe=="как дела?":
-        return "нормально"
-        count=count+1
-    elif messe=="ты супер":
-        return "ты тоже супер"
-        count=count+1
-    elif messe=="мы друзья ?":
-        return "конечно,"
-        count=count+1
-    elif messe=="пока":
-        return str(count)
-    elif messe=="помощь":
-        return "привет я умею: \n здороваться \n делать комплементы \n прощаться"
-    else:
-        return "я тебя не понимаю"
-        count=count+1
+from answer import chat 
 
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
-
-    keyboard=[["привет","как дела?"],["помощь","пока"]]
-    reply_markup = ReplyKeyboardMarkup(
-        keyboard,
-        resize_keyboard=True
-    )
+    context.user_data["step"] = "name"
     await update.message.reply_text(
-        "Привет! Напиши мне что-нибудь.",
-        reply_markup=reply_markup
+        "Привет! как тебя зовут ?",
     )
 
 
@@ -45,12 +21,24 @@ async def answer_message(
 ):
 
     message = update.message.text.lower()
-
-    answer = chat (message)
-
-    await update.message.reply_text(answer)
-
-
+    step=context.user_data["step"]
+    if step=="name":
+        context.user_data["name"]=message
+        context.user_data["step"]="zakaz"
+        keyboard=[["привет","как дела?"],["помощь","пока"]]
+        reply_markup = ReplyKeyboardMarkup(
+            keyboard,
+            resize_keyboard=True
+        )
+    
+        await update.message.reply_text(
+            f"Приятно познакомиться, {message}!\n"
+            "что будете заказывать ?",
+            reply_markup=reply_markup
+        )
+    elif step=="zakaz":
+        context.user_data["zakaz"]=message
+        await update.message.reply_text("заказ принят, ожидайте")
 app = ApplicationBuilder().token(TOKEN).build()
 
 app.add_handler(CommandHandler("start", start))
