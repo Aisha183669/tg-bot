@@ -39,6 +39,9 @@ async def answer_message(
     elif step=="zakaz":
         context.user_data["zakaz"]=message
         await update.message.reply_text("заказ принят, ожидайте")
+    else:
+         await update.message.reply_text("я тебя не понимаю")
+        
 app = ApplicationBuilder().token(TOKEN).build()
 
 app.add_handler(CommandHandler("start", start))
