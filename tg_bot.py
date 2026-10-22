@@ -25,7 +25,7 @@ async def answer_message(
     if step=="name":
         context.user_data["name"]=message
         context.user_data["step"]="zakaz"
-        keyboard=[["привет","как дела?"],["помощь","пока"]]
+        keyboard=[["манная каша","борщ"],["котлета говяжья","котлета куринная"],["картока фри","варенная картошка"]]
         reply_markup = ReplyKeyboardMarkup(
             keyboard,
             resize_keyboard=True
