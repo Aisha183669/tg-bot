@@ -22,7 +22,11 @@ async def answer_message(
 ):
 
     message = update.message.text.lower()
+    name=context.user_data.get("name","не указано")
+    phone=context.user_data.get("phone","не указано")
+    zakaz=context.user_data.get("zakaz",[])
     step=context.user_data["step"]
+    context.user_data["zakaz"]=[]
     if step=="name":
         context.user_data["name"]=message
         context.user_data["step"]="phone"
@@ -32,29 +36,24 @@ async def answer_message(
     elif step=="phone":
         context.user_data["phone"]=message
         context.user_data["step"]="zakaz"
-        keyboard=[["манная каша","борщ"],["котлета говяжья","котлета куринная"],["картока фри","варенная картошка"]]
+        keyboard=[["манная каша","борщ"],["котлета говяжья","котлета куринная"],["картошка фри","варенная картошка"]]
         reply_markup = ReplyKeyboardMarkup(
             keyboard,
             resize_keyboard=True
         )
-        name=context.user_data["name"]
-        phone=context.user_data["phone"]
         await update.message.reply_text(
             f"Приятно познакомиться, {name}, ваш номер телефона {phone}!\n"
             "что будете заказывать ?",
             reply_markup=reply_markup
         )
     elif step=="zakaz":
-        context.user_data["zakaz"]=message
-        zakaz=context.user_data["zakaz"]
+        context.user_data["zakaz"].append(message)
         context.user_data["step"]="true"
         keyboard=[["да","нет"]]
         reply_markup = ReplyKeyboardMarkup(
             keyboard,
             resize_keyboard=True
         )
-        name=context.user_data["name"]
-        phone=context.user_data["phone"]
         await update.message.reply_text(
             f"ваш заказ:\n"
             f"ваше имя: {name}\n"
@@ -63,18 +62,17 @@ async def answer_message(
             f"верно ?",
             reply_markup=reply_markup
         )
+        
     elif step=="true":
         otvet=message
         if otvet=="да":
+            context.user_data["step"]="new_action"
             keyboard=[["что-то еще ?","заказ готов"]]
             reply_markup = ReplyKeyboardMarkup(
             keyboard,
             resize_keyboard=True
             ) 
             await update.message.reply_text("выберите:",reply_markup=reply_markup)
-            name=context.user_data["name"]
-            phone=context.user_data["phone"]
-            zakaz=context.user_data["zakaz"]
             await context.bot.send_message(
                 chat_id=OWNER_CHAT_ID,
                 text=(
@@ -83,17 +81,6 @@ async def answer_message(
                  f"номер телефона: {phone}\n"
                  f"заказ: {zakaz}\n")
             )
-        
-        elif otvet=="что-то еще ?":
-            context.user_data.clear()
-            context.user_data["step"]="name"
-            await update.message.reply_text(
-                f"давай начнем сначало: \n"
-                f"как тебя зовут ?",  
-                reply_markup=reply_markup
-            )
-        elif otvet=="заказ готов":
-            await update.message.reply_text("хорошо,ожидайте")
         elif otvet=="нет":
             context.user_data.clear()
             context.user_data["step"]="name"
@@ -102,6 +89,20 @@ async def answer_message(
                 f"как тебя зовут ?",  
                 reply_markup=reply_markup
             )
+    elif step=="new_action":
+        if message=="что-то еще ?":
+            context.user_data["step"]="zakaz"
+            keyboard=[["манная каша","борщ"],["котлета говяжья","котлета куринная"],["картошка фри","варенная картошка"]]
+            reply_markup = ReplyKeyboardMarkup(
+            keyboard,
+            resize_keyboard=True
+            )
+            await update.message.reply_text(
+                f"что добавить к заказу:",
+                reply_markup=reply_markup
+            )
+        elif message=="заказ готов":
+            await update.message.reply_text("хорошо,ожидайте")
     else:
          await update.message.reply_text("я тебя не понимаю")
         
